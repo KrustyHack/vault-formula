@@ -2,7 +2,7 @@
 {%- if vault.self_signed_cert.enabled %}
 /usr/local/bin/self-cert-gen.sh:
   file.managed:
-    - source: salt://vault/files/cert-gen.sh.jinja
+    - source: salt://vault/files/self-cert-gen.sh.jinja
     - template: jinja
     - user: root
     - group: root
@@ -73,6 +73,6 @@ vault:
       {% endif %}
       - file: /etc/vault/config/server.hcl
       - cmd: install vault
-    - onchanges:
+    - watch:
       - cmd: install vault
       - file: /etc/vault/config/server.hcl
