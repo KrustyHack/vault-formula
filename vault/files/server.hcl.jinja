@@ -12,7 +12,7 @@ storage "gcs" {
   credentials_file = "{{ vault.backend.credentials_file }}"
 }
 {% endif -%}
-{% endif -%}
+{% endif %}
 
 listener "{{ vault.listen_protocol }}" {
   address = "{{ vault.listen_address }}:{{ vault.listen_port }}"
