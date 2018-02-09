@@ -2,7 +2,7 @@
 {%- if vault.self_signed_cert.enabled %}
 /usr/local/bin/self-cert-gen.sh:
   file.managed:
-    - source: salt://vault/files/cert-gen.sh.jinja
+    - source: salt://vault/files/self-cert-gen.sh.jinja
     - template: jinja
     - user: root
     - group: root
