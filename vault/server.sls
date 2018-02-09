@@ -7,6 +7,8 @@
     - user: root
     - group: root
     - mode: 644
+    - context:
+      vault: {{ vault }}
 
 generate self signed SSL certs:
   cmd.run:
