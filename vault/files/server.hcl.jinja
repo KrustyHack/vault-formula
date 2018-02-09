@@ -1,7 +1,15 @@
 {%- from "vault/map.jinja" import vault with context -%}
-{%- if vault.backend and vault.backend.type == "s3" %}
-backend "s3" {
+{%- if vault.backend %}
+{%- if vault.backend.type == "s3" %}
+storage "s3" {
   bucket = "{{ vault.backend.bucket }}"
+  access_key = "{{ vault.backend.access_key }}"
+  secret_key = "{{ vault.backend.secret_key }}"
+}
+{%- elif vault.backend.type == "gcs" %}
+storage "gcs" {
+  bucket = "{{ vault.backend.bucket }}"
+  credentials_file = "{{ vault.backend.credentials_file }}"
 }
 {% endif -%}
 
