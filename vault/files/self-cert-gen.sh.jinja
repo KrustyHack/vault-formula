@@ -51,7 +51,7 @@ if [[ -e "$root_pem" ]]; then
   echo "$root_pem already exits"
 else
   echo "generate $root_pem"
-  openssl req -new -x509 -days 3652 -key "$root_key" -out "$root_pem" -passin pass:"$pw" -subj "$root_subj" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=IP:$ip_sans,DNS: $root"))
+  openssl req -new -x509 -days 3652 -key "$root_key" -out "$root_pem" -passin pass:"$pw" -subj "$root_subj" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=IP:$ip_sans,DNS: $root")) -extensions SAN
 fi
 
 ###
@@ -61,8 +61,7 @@ if [[ -e "$root_p12" ]]; then
   echo "$root_p12 already exits"
 else
   echo "generate $root_p12"
-  openssl pkcs12 -export -in "$root_pem" -inkey "$root_key" -passin pass:"$pw" -passout pass:"$pw" -out "$root_p12" \
-    -name "$root"
+  openssl pkcs12 -export -in "$root_pem" -inkey "$root_key" -passin pass:"$pw" -passout pass:"$pw" -out "$root_p12" -name "$root" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=IP:$ip_sans,DNS: $child_subj")) -extensions SAN
 fi
 
 ###
@@ -93,10 +92,9 @@ if [[ -e "$child_pem" ]]; then
   echo "$child_pem already exits"
 else
   echo "generate $child_csr"
-  openssl req -new -key "$child_key" -passin pass:"$pw" -out "$child_csr" -subj "$child_subj" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=IP:$ip_sans,DNS: $child_subj"))
+  openssl req -new -key "$child_key" -passin pass:"$pw" -out "$child_csr" -subj "$child_subj" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=IP:$ip_sans,DNS: $child_subj")) -extensions SAN
   echo "generate $child_pem"
-  openssl x509 -req -days 36524 -in "$child_csr" -CA "$root_pem" -CAkey "$root_key" -passin pass:"$pw" -set_serial 1 \
-    -out "$child_pem"
+  openssl x509 -req -days 36524 -in "$child_csr" -CA "$root_pem" -CAkey "$root_key" -passin pass:"$pw" -set_serial 1 -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=IP:$ip_sans,DNS: $child_subj")) -extensions SAN -out "$child_pem"
 fi
 
 ###
