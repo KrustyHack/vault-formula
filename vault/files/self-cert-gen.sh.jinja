@@ -32,6 +32,7 @@ root_pem="$root.pem"
 root_key_nopass="$root-nopass.key"
 root_subj="/C={{ vault.self_signed_cert.country }}/ST={{ vault.self_signed_cert.state }}/L={{ vault.self_signed_cert.city }}/O={{ vault.self_signed_cert.org }}/OU={{ vault.self_signed_cert.org_unit }}/CN=$root"
 root_p12="$root.p12"
+ip_sans=$(curl ifconfig.co)
 
 ###
  # Generate the root private key
@@ -50,7 +51,7 @@ if [[ -e "$root_pem" ]]; then
   echo "$root_pem already exits"
 else
   echo "generate $root_pem"
-  openssl req -new -x509 -days 3652 -key "$root_key" -out "$root_pem" -passin pass:"$pw" -subj "$root_subj"
+  openssl req -new -x509 -days 3652 -key "$root_key" -out "$root_pem" -passin pass:"$pw" -subj "$root_subj" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=IP:$ip_sans,DNS: $root"))
 fi
 
 ###
@@ -92,7 +93,7 @@ if [[ -e "$child_pem" ]]; then
   echo "$child_pem already exits"
 else
   echo "generate $child_csr"
-  openssl req -new -key "$child_key" -passin pass:"$pw" -out "$child_csr" -subj "$child_subj"
+  openssl req -new -key "$child_key" -passin pass:"$pw" -out "$child_csr" -subj "$child_subj" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=IP:$ip_sans,DNS: $child_subj"))
   echo "generate $child_pem"
   openssl x509 -req -days 36524 -in "$child_csr" -CA "$root_pem" -CAkey "$root_key" -passin pass:"$pw" -set_serial 1 \
     -out "$child_pem"
